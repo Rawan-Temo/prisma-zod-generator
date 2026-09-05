@@ -821,20 +821,10 @@ export class PrismaTypeMapper {
         result.zodSchema = 'z.string()';
         break;
 
-      case 'Int': {
-        let intSchema = 'z.number().int()';
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-require-imports -- lazy require to avoid circular import
-          const transformer = require('../transformer').default;
-          const cfg = transformer.getGeneratorConfig?.();
-          if (cfg?.inputCoercion) intSchema = 'z.coerce.number().int()';
-        } catch {
-          /* ignore */
-        }
-        result.zodSchema = intSchema;
+      case 'Int':
+        result.zodSchema = 'z.number().int()';
         result.additionalValidations.push('// Integer validation applied');
         break;
-      }
 
       case 'BigInt':
         // Check for JSON Schema compatibility mode
@@ -859,44 +849,24 @@ export class PrismaTypeMapper {
             );
           }
         } else {
-          result.zodSchema = cfg?.inputCoercion ? 'z.coerce.bigint()' : 'z.bigint()';
+          result.zodSchema = 'z.bigint()';
           if (this.config.validateBigInt) {
             result.additionalValidations.push('// BigInt validation enabled');
           }
         }
         break;
 
-      case 'Float': {
-        let floatSchema = 'z.number()';
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-require-imports -- lazy require to avoid circular import
-          const transformer = require('../transformer').default;
-          const cfg = transformer.getGeneratorConfig?.();
-          if (cfg?.inputCoercion) floatSchema = 'z.coerce.number()';
-        } catch {
-          /* ignore */
-        }
-        result.zodSchema = floatSchema;
+      case 'Float':
+        result.zodSchema = 'z.number()';
         break;
-      }
 
       case 'Decimal':
         this.mapDecimalType(field, result, model.name);
         break;
 
-      case 'Boolean': {
-        let boolSchema = 'z.boolean()';
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-require-imports -- lazy require to avoid circular import
-          const transformer = require('../transformer').default;
-          const cfg = transformer.getGeneratorConfig?.();
-          if (cfg?.inputCoercion) boolSchema = 'z.coerce.boolean()';
-        } catch {
-          /* ignore */
-        }
-        result.zodSchema = boolSchema;
+      case 'Boolean':
+        result.zodSchema = 'z.boolean()';
         break;
-      }
 
       case 'DateTime':
         this.mapDateTimeType(field, result);
@@ -1034,17 +1004,8 @@ export class PrismaTypeMapper {
         break;
       }
 
-      case 'number': {
-        let numSchema = 'z.number()';
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-require-imports -- lazy require to avoid circular import
-          const transformer = require('../transformer').default;
-          const cfg = transformer.getGeneratorConfig?.();
-          if (cfg?.inputCoercion) numSchema = 'z.coerce.number()';
-        } catch {
-          /* ignore */
-        }
-        result.zodSchema = numSchema;
+      case 'number':
+        result.zodSchema = 'z.number()';
 
         // Add number-specific validations
         if (!decimalConfig.allowNegative) {
@@ -1065,7 +1026,6 @@ export class PrismaTypeMapper {
           );
         }
         break;
-      }
 
       case 'decimal': {
         // Full Decimal.js support matching zod-prisma-types

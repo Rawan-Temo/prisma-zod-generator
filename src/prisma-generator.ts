@@ -40,6 +40,7 @@ import type { CustomImport } from './parsers/zod-comments';
 import type { SchemaEnumWithValues } from './types';
 import { ResolvedSafetyConfig } from './types/safety';
 import { logger } from './utils/logger';
+import { booleanCoercionExpr } from './utils/coercion';
 import { addFileToManifest, safeCleanupOutput, saveManifest } from './utils/safeOutputManagement';
 import {
   mergeSafetyConfigs,
@@ -2486,6 +2487,7 @@ async function generateVariantSchemaContent(
     validateTypeCompatibility: true,
     collectDetailedErrors: true,
     zodVersion: config?.zodImportTarget || 'auto',
+    inputCoercion: config?.inputCoercion === true,
   });
   const enhancedModel = enhancedModels[0];
 
@@ -2660,13 +2662,17 @@ function getZodTypeForField(field: DMMF.Field, variantName?: string): string {
       baseType = 'string()';
       break;
     case 'Int':
-      baseType = cfg?.inputCoercion ? 'coerce.number().int()' : 'number().int()';
+      baseType =
+        cfg?.inputCoercion && variantName === 'input' ? 'coerce.number().int()' : 'number().int()';
       break;
     case 'Float':
-      baseType = cfg?.inputCoercion ? 'coerce.number()' : 'number()';
+      baseType = cfg?.inputCoercion && variantName === 'input' ? 'coerce.number()' : 'number()';
       break;
     case 'Boolean':
-      baseType = cfg?.inputCoercion ? 'coerce.boolean()' : 'boolean()';
+      baseType =
+        cfg?.inputCoercion && variantName === 'input'
+          ? booleanCoercionExpr((cfg?.zodImportTarget ?? 'auto') as 'auto' | 'v3' | 'v4')
+          : 'boolean()';
       break;
     case 'DateTime':
       if (cfg?.jsonSchemaCompatible) {
@@ -2719,7 +2725,7 @@ function getZodTypeForField(field: DMMF.Field, variantName?: string): string {
           baseType = 'number().int()'; // Note: May lose precision for very large numbers
         }
       } else {
-        baseType = cfg?.inputCoercion ? 'coerce.bigint()' : 'bigint()';
+        baseType = cfg?.inputCoercion && variantName === 'input' ? 'coerce.bigint()' : 'bigint()';
       }
       break;
     case 'Decimal':
@@ -2733,7 +2739,7 @@ function getZodTypeForField(field: DMMF.Field, variantName?: string): string {
       } else if (cfg?.decimalMode === 'string') {
         baseType = 'string()';
       } else {
-        baseType = cfg?.inputCoercion ? 'coerce.number()' : 'number()'; // Default to number for backward compatibility
+        baseType = cfg?.inputCoercion && variantName === 'input' ? 'coerce.number()' : 'number()'; // Default to number for backward compatibility
       }
       break;
     default:

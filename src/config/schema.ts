@@ -262,7 +262,7 @@ export const ConfigurationSchema: JSONSchema7 = {
       type: 'boolean',
       default: false,
       description:
-        'When true, use z.coerce.number() / z.coerce.boolean() / z.coerce.bigint() for Int, Float, Boolean, BigInt, and Decimal (decimalMode=number) in all generated schemas. Useful when validating HTTP query parameters where values arrive as strings.',
+        "When true, coerce 'true'/'false' into booleans and numeric strings into numbers/bigints on DMMF input types (filter, CRUD input, select, include objects and argument schemas including take/skip) and the input variant. Booleans accept 'true'/'false' strings via z.union([z.boolean(), z.stringbool()]) (Zod 4) or a preprocess mapping (Zod 3) instead of the lossy z.coerce.boolean(). Pure models, result variants and result schemas stay strict. Useful when validating HTTP query parameters where values arrive as strings.",
     },
     jsonSchemaCompatible: {
       type: 'boolean',

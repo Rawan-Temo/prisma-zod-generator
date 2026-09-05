@@ -294,12 +294,20 @@ export const NumberValidationCreateInputSchema = z.object({
 ### Type Coercion
 
 `@zod.coerce()` on an `Int`, `Float`, `BigInt` or `Boolean` field switches its base
-type to Zod's coercing constructor (`z.coerce.number()`, `z.coerce.bigint()`,
-`z.coerce.boolean()`), so a value arriving as a string — a raw HTML form field, a
-query-string parameter — is converted before validation instead of rejected. Chain
-the rest of the validators after it as usual; `DateTime` fields already have this
-through the generator-level [`dateTimeStrategy: 'coerce'`](../reference/config-options.md)
-option instead of a per-field annotation.
+ type to Zod's coercing constructor (`z.coerce.number()`, `z.coerce.bigint()`,
+ `z.coerce.boolean()`), so a value arriving as a string — a raw HTML form field, a
+ query-string parameter — is converted before validation instead of rejected. Chain
+ the rest of the validators after it as usual. `Boolean` does not use
+ `z.coerce.boolean()` (which applies JavaScript's `Boolean(x)` — it would turn
+ `'false'` into `true` and flatten nested objects); it instead accepts the string
+ forms `'true'`/`'false'` alongside real booleans via
+ `z.union([z.boolean(), z.stringbool()])` on Zod 4, or a `z.preprocess` mapping them
+ onto `z.boolean()` on Zod 3 — see [`inputCoercion`](../config/input-coercion.md),
+ the generator-level switch that applies equivalent coercion to every filter,
+ CRUD-input and input-variant field, any field with `@zod.coerce()`, and the
+ `take`/`skip` pagination arguments. `DateTime` fields already have this behavior
+ through the generator-level [`dateTimeStrategy: 'coerce'`](../reference/config-options.md)
+ option instead of a per-field annotation.
 
 ```prisma
 model CoerceExample {
@@ -318,7 +326,8 @@ Generated schema:
 export const CoerceExampleCreateInputSchema = z.object({
   count: z.coerce.number().int().min(1),
   ratio: z.coerce.number(),
-  agree: z.coerce.boolean(),
+  agree: z.union([z.boolean(), z.stringbool()]), // Zod 4
+  // Zod 3: agree: z.preprocess((v) => v === "true" ? true : v === "false" ? false : v, z.boolean()),
 });
 ```
 
