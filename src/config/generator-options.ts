@@ -23,7 +23,7 @@ export interface ExtendedGeneratorOptions {
   pureModelsExcludeCircularRelations?: boolean; // When pureModelsIncludeRelations is true, exclude circular relations (default false)
   dateTimeStrategy?: 'date' | 'coerce' | 'isoString'; // DateTime scalar strategy
   dateTimeSplitStrategy?: boolean; // Split default: inputs=coerce, pure/results=date when dateTimeStrategy is unset
-  inputCoercion?: boolean; // Use z.coerce.*() for numeric and boolean types
+  inputCoercion?: boolean; // Coerce string input to number/bigint; accept 'true'/'false' for boolean
   jsonSchemaCompatible?: boolean; // Generate schemas compatible with z.toJSONSchema()
   jsonSchemaOptions?: {
     dateTimeFormat?: 'isoString' | 'isoDate';
